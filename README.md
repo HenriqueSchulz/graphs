@@ -1,3 +1,3 @@
 Requirements:
 
-pip install pyvis
+pip install pyvis psutil
