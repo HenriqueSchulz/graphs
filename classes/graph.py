@@ -1,12 +1,10 @@
 from classes.node import Node
-
 from pyvis.network import Network
 from collections import deque
 import webbrowser
 
 
 class Graph:
-    '''Implementation of a Graph'''
 
     def __init__(self):
         self.size = 0
@@ -34,8 +32,29 @@ class Graph:
         
         self.edges += 1
 
-    def heuristic(self, node: Node, goal: Node):
+    def heuristic_zero(self, node: Node, goal: Node):
+        return 0
+
+    def heuristic_degree(self, node: Node, goal: Node):
         return abs(node.degree - goal.degree)
+
+    def precompute_bfs_heuristic(self, goal: Node):
+        distances = {node: float('inf') for node in self.nodes}
+        queue = deque([goal])
+        distances[goal] = 0
+
+        while queue:
+            current = queue.popleft()
+
+            for neighbor, _ in current.nodes:
+                if distances[neighbor] == float('inf'):
+                    distances[neighbor] = distances[current] + 1
+                    queue.append(neighbor)
+
+        return distances
+
+    def heuristic_bfs(self, node: Node, goal: Node, bfs_distances):
+        return bfs_distances[node]
 
     def dijkstra(self, start_node: Node, end_node: Node):
         distances = {node: float('inf') for node in self.nodes}
@@ -97,7 +116,7 @@ class Graph:
             "expanded_nodes": expanded_nodes
         }
 
-    def a_star(self, start_node: Node, end_node: Node):
+    def a_star(self, start_node: Node, end_node: Node, heuristic_fn):
         open_set = {start_node}
         came_from = {}
 
@@ -105,7 +124,7 @@ class Graph:
         g_score[start_node] = 0
 
         f_score = {node: float('inf') for node in self.nodes}
-        f_score[start_node] = self.heuristic(start_node, end_node)
+        f_score[start_node] = heuristic_fn(start_node, end_node)
 
         iterations = 0
         expanded_nodes = 0
@@ -140,7 +159,7 @@ class Graph:
                     came_from[neighbor] = current
                     g_score[neighbor] = tentative_g
                     f_score[neighbor] = (
-                        tentative_g + self.heuristic(neighbor, end_node)
+                        tentative_g + heuristic_fn(neighbor, end_node)
                     )
                     open_set.add(neighbor)
 
