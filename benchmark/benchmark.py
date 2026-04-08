@@ -18,7 +18,8 @@ class Benchmark:
         self.algorithms = {
             "BFS": self.graph.bfs,
             "DFS": self.graph.dfs,
-            "Dijkstra": self.graph.dijkstra
+            "Dijkstra": self.graph.dijkstra,
+            "A*": self.graph.a_star
         }
 
         self._create_dirs()

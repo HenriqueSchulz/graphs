@@ -116,7 +116,12 @@ class Graph:
             "expanded_nodes": expanded_nodes
         }
 
-    def a_star(self, start_node: Node, end_node: Node, heuristic_fn):
+    def a_star(self, start_node: Node, end_node: Node, heuristic_fn=None):
+        
+        if heuristic_fn is None:
+            bfs_distances = self.precompute_bfs_heuristic(end_node)
+            heuristic_fn = lambda node, goal: bfs_distances[node]
+        
         open_set = {start_node}
         came_from = {}
 
