@@ -3,11 +3,13 @@ from __future__ import annotations
 class Node:
     '''Implementation of a Node'''
 
-    def __init__(self, value):
+    def __init__(self, value, lat=None, lon=None):
         '''Create a intance of a node'''
 
         self.value = value
-        self.nodes: list[Node] = []
+        self.lat = lat
+        self.lon = lon
+        self.nodes: list[Node] = []      
         self.degree = 0
     
     def add_edge(self, node: Node, wheight):

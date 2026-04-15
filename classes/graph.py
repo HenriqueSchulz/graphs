@@ -3,7 +3,7 @@ from classes.node import Node
 from pyvis.network import Network
 from collections import deque
 import webbrowser
-
+from math import radians, sin, cos, sqrt, atan2
 
 class Graph:
     '''Implementation of a Graph'''
@@ -12,6 +12,20 @@ class Graph:
         self.size = 0
         self.nodes: list[Node] = []
         self.edges = 0
+
+    def real_distance(node1, node2):
+        R = 6371000  # metros
+
+        lat1, lon1 = radians(node1.lat), radians(node1.lon)
+        lat2, lon2 = radians(node2.lat), radians(node2.lon)
+
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+
+        a = sin(dlat/2)**2 + cos(lat1)*cos(lat2)*sin(dlon/2)**2
+        c = 2 * atan2(sqrt(a), sqrt(1-a))
+
+        return R * c
 
     def add_node(self, node: Node):
         self.nodes.append(node)
