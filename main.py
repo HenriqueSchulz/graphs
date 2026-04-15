@@ -1,85 +1,86 @@
 from classes import Graph
 from classes import Node
 from benchmark import Benchmark
+from math import radians, sin, cos, sqrt, atan2
+
+# =========================
+# DISTÂNCIA REAL (Haversine)
+# =========================
+def real_distance(node1, node2):
+    R = 6371000  # metros
+
+    lat1, lon1 = radians(node1.lat), radians(node1.lon)
+    lat2, lon2 = radians(node2.lat), radians(node2.lon)
+
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+
+    a = sin(dlat/2)**2 + cos(lat1)*cos(lat2)*sin(dlon/2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1-a))
+
+    return round(R * c, 2)
+
 
 graph = Graph()
 
-# Neighborhoods
-A = Node("CD")
-B = Node("Centro")
-C = Node("Batel")
-D = Node("Agua Verde")
-E = Node("Portao")
-F = Node("CIC")
-G = Node("Santa Felicidade")
-H = Node("Boa Vista")
-I = Node("Cabral")
-J = Node("Alto da XV")
-K = Node("Jardim Botanico")
-L = Node("Uberaba")
+# =========================
+# NÓS COM COORDENADAS REAIS
+# =========================
+A = Node("CD", -25.45, -49.30)
+B = Node("Centro", -25.4284, -49.2733)
+C = Node("Batel", -25.4395, -49.2908)
+D = Node("Agua Verde", -25.4522, -49.2804)
+E = Node("Portao", -25.4765, -49.2943)
+F = Node("CIC", -25.5070, -49.3345)
+G = Node("Santa Felicidade", -25.3943, -49.3325)
+H = Node("Boa Vista", -25.3820, -49.2467)
+I = Node("Cabral", -25.4055, -49.2522)
+J = Node("Alto da XV", -25.4180, -49.2605)
+K = Node("Jardim Botanico", -25.4432, -49.2390)
+L = Node("Uberaba", -25.4832, -49.2312)
 
 nodes = [A,B,C,D,E,F,G,H,I,J,K,L]
 
 for n in nodes:
     graph.add_node(n)
 
+K_NEIGHBORS = 3
+
+for node in nodes:
+    distances = []
+
+    for other in nodes:
+        if node != other:
+            dist = real_distance(node, other)
+            distances.append((other, dist))
+
+    distances.sort(key=lambda x: x[1])
+
+    for neighbor, dist in distances[:K_NEIGHBORS]:
+        graph.add_edge(node, neighbor, dist)
+
 # =========================
-# GRAFO ORIGINAL
+# DEBUG
 # =========================
-graph.add_edge(A, B, 5)
-graph.add_edge(A, D, 7)
-graph.add_edge(B, C, 4)
-graph.add_edge(B, J, 6)
-graph.add_edge(C, D, 3)
-graph.add_edge(D, E, 5)
-graph.add_edge(E, F, 8)
-graph.add_edge(F, G, 10)
-graph.add_edge(G, H, 6)
-graph.add_edge(H, I, 4)
-graph.add_edge(I, J, 3)
-graph.add_edge(J, K, 5)
-graph.add_edge(K, L, 7)
-graph.add_edge(C, K, 6)
-graph.add_edge(D, J, 4)
-graph.add_edge(A, C, 9)
-graph.add_edge(A, E, 10)
-graph.add_edge(B, D, 6)
-graph.add_edge(B, H, 11)
-graph.add_edge(C, E, 4)
-graph.add_edge(C, I, 7)
-graph.add_edge(D, F, 6)
-graph.add_edge(E, H, 5)
-graph.add_edge(E, J, 9)
-graph.add_edge(F, I, 3)
-graph.add_edge(F, K, 8)
-graph.add_edge(G, J, 4)
-graph.add_edge(G, L, 2)
-graph.add_edge(H, K, 6)
-graph.add_edge(I, L, 5)
+#graph.display()
+#print(f"Size: {graph.size}")
+#print(f"Edges: {graph.edges}")
 
-# Loops / Local cicles
-graph.add_edge(D, B, 3)
-graph.add_edge(E, C, 2)
-graph.add_edge(F, D, 4)
-graph.add_edge(H, E, 3)
-graph.add_edge(I, F, 2)
-graph.add_edge(J, G, 5)
-graph.add_edge(K, H, 4)
-graph.add_edge(L, I, 3)
-
-# Loops / Larger cicles
-graph.add_edge(A, G, 12)
-graph.add_edge(G, D, 7)
-graph.add_edge(B, I, 10)
-graph.add_edge(I, C, 6)
-graph.add_edge(E, L, 11)
-graph.add_edge(L, A, 15)
-
-graph.display()
-print(f"Size: {graph.size}")
-print(f"Edges: {graph.edges}")
-
+# =========================
+# BENCHMARK
+# =========================
 benchmark = Benchmark(graph, rounds=5)
-benchmark_results = benchmark.run(A, target_nodes=[E, F, G, H, I, J, K, L])
-#benchmark.display_table(benchmark_results)
-#benchmark.run_a_star_test(A, target_nodes=[E, F, G, H, I, J, K, L], mode="on_the_fly")
+
+benchmark_results = benchmark.run(
+    A,
+    target_nodes=[E, F, G, H, I, J, K, L]
+)
+
+benchmark.display_table(benchmark_results)
+
+benchmark_a_star_results = benchmark.run_a_star_test(
+    A,
+    target_nodes=[E, F, G, H, I, J, K, L]
+)
+
+benchmark.display_table(benchmark_a_star_results)

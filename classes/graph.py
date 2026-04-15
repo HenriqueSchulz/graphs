@@ -11,20 +11,6 @@ class Graph:
         self.nodes: list[Node] = []
         self.edges = 0
 
-    def real_distance(node1, node2):
-        R = 6371000  # metros
-
-        lat1, lon1 = radians(node1.lat), radians(node1.lon)
-        lat2, lon2 = radians(node2.lat), radians(node2.lon)
-
-        dlat = lat2 - lat1
-        dlon = lon2 - lon1
-
-        a = sin(dlat/2)**2 + cos(lat1)*cos(lat2)*sin(dlon/2)**2
-        c = 2 * atan2(sqrt(a), sqrt(1-a))
-
-        return R * c
-
     def add_node(self, node: Node):
         self.nodes.append(node)
         self.size += 1
@@ -52,23 +38,22 @@ class Graph:
     def heuristic_degree(self, node: Node, goal: Node):
         return abs(node.degree - goal.degree)
 
-    def precompute_bfs_heuristic(self, goal: Node):
-        distances = {node: float('inf') for node in self.nodes}
-        queue = deque([goal])
-        distances[goal] = 0
+    def heuristic_geo(self, node: Node, goal: Node):
+        if node.lat is None or goal.lat is None:
+            return 0
 
-        while queue:
-            current = queue.popleft()
+        R = 6371000
 
-            for neighbor, _ in current.nodes:
-                if distances[neighbor] == float('inf'):
-                    distances[neighbor] = distances[current] + 1
-                    queue.append(neighbor)
+        lat1, lon1 = radians(node.lat), radians(node.lon)
+        lat2, lon2 = radians(goal.lat), radians(goal.lon)
 
-        return distances
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
 
-    def heuristic_bfs(self, node: Node, goal: Node, bfs_distances):
-        return bfs_distances[node]
+        a = sin(dlat/2)**2 + cos(lat1)*cos(lat2)*sin(dlon/2)**2
+        c = 2 * atan2(sqrt(a), sqrt(1-a))
+
+        return R * c
 
     def dijkstra(self, start_node: Node, end_node: Node):
         distances = {node: float('inf') for node in self.nodes}
@@ -133,8 +118,7 @@ class Graph:
     def a_star(self, start_node: Node, end_node: Node, heuristic_fn=None):
         
         if heuristic_fn is None:
-            bfs_distances = self.precompute_bfs_heuristic(end_node)
-            heuristic_fn = lambda node, goal: bfs_distances[node]
+            heuristic_fn = self.heuristic_geo
         
         open_set = {start_node}
         came_from = {}
