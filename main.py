@@ -62,9 +62,9 @@ for node in nodes:
 # =========================
 # DEBUG
 # =========================
-#graph.display()
-#print(f"Size: {graph.size}")
-#print(f"Edges: {graph.edges}")
+graph.display()
+print(f"Size: {graph.size}")
+print(f"Edges: {graph.edges}")
 
 # =========================
 # BENCHMARK
@@ -78,9 +78,7 @@ benchmark_results = benchmark.run(
 
 benchmark.display_table(benchmark_results)
 
-benchmark_a_star_results = benchmark.run_a_star_test(
-    A,
-    target_nodes=[E, F, G, H, I, J, K, L]
+benchmark_a_star_results = benchmark.run_a_star_test(A, target_nodes=[E, F, G, H, I, J, K, L]
 )
 
 benchmark.display_table(benchmark_a_star_results)
